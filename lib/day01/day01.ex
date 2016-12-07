@@ -23,30 +23,17 @@ defmodule AdventOfCode.Day01 do
     {part01, part02}
   end
 
-  defp move([{?L, num} | rest], :north, [{x, y} | _] = pos) do
+  defp move([{dir, num} | rest], bearing, [{x, y} | _] = pos) when dir == ?L and bearing == :north or dir == ?R and bearing == :south do
     move(rest, :west, [{x - num, y} | pos])
   end
-  defp move([{?L, num} | rest], :east, [{x, y} | _] = pos) do
+  defp move([{dir, num} | rest], bearing, [{x, y} | _] = pos)  when dir == ?L and bearing == :east or dir == ?R and bearing == :west do
     move(rest, :north, [{x, y + num} | pos])
   end
-  defp move([{?L, num} | rest], :south, [{x, y} | _] = pos) do
+  defp move([{dir, num} | rest], bearing, [{x, y} | _] = pos)  when dir == ?L and bearing == :south or dir == ?R and bearing == :north do
     move(rest, :east, [{x + num, y} | pos])
   end
-  defp move([{?L, num} | rest], :west, [{x, y} | _] = pos) do
+  defp move([{dir, num} | rest], bearing, [{x, y} | _] = pos)  when dir == ?L and bearing == :west or dir == ?R and bearing == :east do
     move(rest, :south, [{x, y - num} | pos])
-  end
-
-  defp move([{?R, num} | rest], :north, [{x, y} | _] = pos) do
-    move(rest, :east, [{x + num, y} | pos])
-  end
-  defp move([{?R, num} | rest], :east, [{x, y} | _] = pos) do
-    move(rest, :south, [{x, y - num} | pos])
-  end
-  defp move([{?R, num} | rest], :south, [{x, y} | _] = pos) do
-    move(rest, :west, [{x - num, y} | pos])
-  end
-  defp move([{?R, num} | rest], :west, [{x, y} | _] = pos) do
-    move(rest, :north, [{x, y + num} | pos])
   end
 
   defp read_file do
