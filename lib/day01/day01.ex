@@ -1,42 +1,52 @@
 defmodule AdventOfCode.Day01 do
-  def part01 do
-    move(read_file, :north, {0, 0})
+  def solve do
+    {part01, part02} =
+      read_file()
+      |> parse_inputs()
+      |> move()
+
+    IO.inspect "Part 01: #{inspect(part01)}"
+    IO.inspect "Part 02: #{inspect(part02)}"
+    nil
   end
 
-  defp move([], _, {x, y}), do: abs(x) + abs(y)
-
-  defp move(["L" <> num | rest], :north, {x, y}) do
-    new_x = x - parse_int(num)
-    move(rest, :west, {new_x, y})
-  end
-  defp move(["L" <> num | rest], :east, {x, y}) do
-    new_y = y + parse_int(num)
-    move(rest, :north, {x, new_y})
-  end
-  defp move(["L" <> num | rest], :south, {x, y}) do
-    new_x = x + parse_int(num)
-    move(rest, :east, {new_x, y})
-  end
-  defp move(["L" <> num | rest], :west, {x, y}) do
-    new_y = y - parse_int(num)
-    move(rest, :south, {x, new_y})
+  def find_first_visited_twice(_positions) do
+    {0, 0}
   end
 
-  defp move(["R" <> num | rest], :north, {x, y}) do
-    new_x = x + parse_int(num)
-    move(rest, :east, {new_x, y})
+  defp move(directions, current_direction \\ :north, positions \\ [{0, 0}])
+
+  defp move([], _, [{x, y} | _] = positions) do
+    part01 = abs(x) + abs(y)
+    part02 = find_first_visited_twice(positions)
+
+    {part01, part02}
   end
-  defp move(["R" <> num | rest], :east, {x, y}) do
-    new_y = y - parse_int(num)
-    move(rest, :south, {x, new_y})
+
+  defp move([{?L, num} | rest], :north, [{x, y} | _] = pos) do
+    move(rest, :west, [{x - num, y} | pos])
   end
-  defp move(["R" <> num | rest], :south, {x, y}) do
-    new_x = x - parse_int(num)
-    move(rest, :west, {new_x, y})
+  defp move([{?L, num} | rest], :east, [{x, y} | _] = pos) do
+    move(rest, :north, [{x, y + num} | pos])
   end
-  defp move(["R" <> num | rest], :west, {x, y}) do
-    new_y = y + parse_int(num)
-    move(rest, :north, {x, new_y})
+  defp move([{?L, num} | rest], :south, [{x, y} | _] = pos) do
+    move(rest, :east, [{x + num, y} | pos])
+  end
+  defp move([{?L, num} | rest], :west, [{x, y} | _] = pos) do
+    move(rest, :south, [{x, y - num} | pos])
+  end
+
+  defp move([{?R, num} | rest], :north, [{x, y} | _] = pos) do
+    move(rest, :east, [{x + num, y} | pos])
+  end
+  defp move([{?R, num} | rest], :east, [{x, y} | _] = pos) do
+    move(rest, :south, [{x, y - num} | pos])
+  end
+  defp move([{?R, num} | rest], :south, [{x, y} | _] = pos) do
+    move(rest, :west, [{x - num, y} | pos])
+  end
+  defp move([{?R, num} | rest], :west, [{x, y} | _] = pos) do
+    move(rest, :north, [{x, y + num} | pos])
   end
 
   defp read_file do
@@ -44,6 +54,14 @@ defmodule AdventOfCode.Day01 do
       {:ok, content} -> content |> String.strip |>  String.split(", ")
       {:error, _} -> raise "Input file is missing"
     end
+  end
+
+  defp parse_inputs(input) do
+    input |> Enum.map(&parse_input/1)
+  end
+
+  defp parse_input(<< dir :: size(8), length :: binary>>) do
+    {dir, parse_int(length)}
   end
 
   defp parse_int(str) do
