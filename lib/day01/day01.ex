@@ -1,40 +1,50 @@
 defmodule AdventOfCode.Day01 do
+  @right_bearings %{north: :east, east: :south, south: :west, west: :north }
+  @left_bearings %{east: :north, south: :east, west: :south, north: :west}
+
   def solve do
     {part01, part02} =
       read_file()
       |> parse_inputs()
-      |> move()
+      |> handle_instructions()
 
     IO.inspect "Part 01: #{inspect(part01)}"
     IO.inspect "Part 02: #{inspect(part02)}"
     nil
   end
 
-  def find_first_visited_twice(_positions) do
-    {0, 0}
+
+  defp distance_from_dropzone({x,y}), do: abs(x) + abs(y)
+
+  defp find_first_visited_twice(positions, visited \\ [])
+  defp find_first_visited_twice([current | rest], visited) do
+    case current in visited do
+      true  -> current
+      false -> find_first_visited_twice(rest, [current|visited])
+    end
   end
 
-  defp move(directions, current_direction \\ :north, positions \\ [{0, 0}])
-
-  defp move([], _, [{x, y} | _] = positions) do
-    part01 = abs(x) + abs(y)
-    part02 = find_first_visited_twice(positions)
+  defp handle_instructions(directions, bearing \\ :north, pos \\ [{0, 0}])
+  defp handle_instructions([], _, [point | _] = positions) do
+    part01 = distance_from_dropzone(point)
+    part02 = positions |> Enum.reverse() |> find_first_visited_twice() |> distance_from_dropzone()
 
     {part01, part02}
   end
+  defp handle_instructions([{dir, num} | rest], bearing, pos) do
+    new_bearing = turn(dir, bearing)
+    new_pos = move(num, pos, new_bearing)
+    handle_instructions(rest, new_bearing, new_pos)
+  end
 
-  defp move([{dir, num} | rest], bearing, [{x, y} | _] = pos) when dir == ?L and bearing == :north or dir == ?R and bearing == :south do
-    move(rest, :west, [{x - num, y} | pos])
-  end
-  defp move([{dir, num} | rest], bearing, [{x, y} | _] = pos)  when dir == ?L and bearing == :east or dir == ?R and bearing == :west do
-    move(rest, :north, [{x, y + num} | pos])
-  end
-  defp move([{dir, num} | rest], bearing, [{x, y} | _] = pos)  when dir == ?L and bearing == :south or dir == ?R and bearing == :north do
-    move(rest, :east, [{x + num, y} | pos])
-  end
-  defp move([{dir, num} | rest], bearing, [{x, y} | _] = pos)  when dir == ?L and bearing == :west or dir == ?R and bearing == :east do
-    move(rest, :south, [{x, y - num} | pos])
-  end
+  defp move(0, positions, _), do: positions
+  defp move(n, [{x, y}|_] = p, :north = b), do: move(n-1, [{x, y + 1}|p], b)
+  defp move(n, [{x, y}|_] = p, :east = b),  do: move(n-1, [{x + 1, y}|p], b)
+  defp move(n, [{x, y}|_] = p, :south = b), do: move(n-1, [{x, y - 1}|p], b)
+  defp move(n, [{x, y}|_] = p, :west = b),  do: move(n-1, [{x - 1, y}|p], b)
+
+  defp turn(?R, bearing), do: @right_bearings[bearing]
+  defp turn(?L, bearing), do: @left_bearings[bearing]
 
   defp read_file do
     case File.read("lib/day01/input.txt") do
