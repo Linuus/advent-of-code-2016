@@ -13,7 +13,6 @@ defmodule AdventOfCode.Day01 do
     nil
   end
 
-
   defp distance_from_dropzone({x,y}), do: abs(x) + abs(y)
 
   defp find_first_visited_twice(positions, visited \\ [])
