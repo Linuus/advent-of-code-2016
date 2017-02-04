@@ -3,16 +3,15 @@ defmodule AdventOfCode.Day07.Part01 do
     read_file |> Enum.filter(&valid?/1) |> length()
   end
 
-  defp valid?(ip), do: valid?(ip, :out, :no_abba)
+  defp valid?(ip), do: valid?(ip, :out, false)
 
-  defp valid?("", _, :abba), do: true
-  defp valid?("", _, :no_abba), do: false
+  defp valid?("", _, abba), do: abba
 
-  defp valid?(<< a, b, b, a, rest :: binary >>, :out, _) when a != b, do: valid?(rest, :out, :abba)
+  defp valid?(<< a, b, b, a, rest :: binary >>, :out, _) when a != b, do: valid?(rest, :out, true)
   defp valid?(<< a, b, b, a, _rest :: binary >>, :in, _) when a != b, do: false
 
   defp valid?("[" <> rest, _, abba), do: valid?(rest, :in, abba)
-  defp valid?(<< _, _, _, "]", rest :: binary >>, :in, abba), do: valid?(rest, :out, abba)
+  defp valid?("]" <> rest, _, abba), do: valid?(rest, :out, abba)
 
   defp valid?(<< _, rest :: binary >>, state, abba), do: valid?(rest, state, abba)
 
